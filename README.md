@@ -10,4 +10,4 @@ How to use:
 to build it
 1. open espfw and build with the vscode extension platformio. here you can change settings as you please.
 2. hit upload on platformio
-3. begin on stap 2 of how to use.
+3. begin on step 2 of how to use.
