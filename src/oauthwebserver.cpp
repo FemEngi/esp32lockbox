@@ -145,11 +145,11 @@ const char htmlTemplate[] PROGMEM = R"=====(
 
 void unlockDevice() {
     // Add your logic to unlock the device here
-    Serial.println("Device unlocked!");
-    if (!canBeUnlocked) {
-    digitalWrite(pinsolenoid, LOW);
-    
-    unlocksolenoid = millis();
+    if (canBeUnlocked) {
+      Serial.println("Device unlocked!");
+      digitalWrite(pinsolenoid, LOW);
+      
+      unlocksolenoid = millis();
     }
     // digitalWrite(pinsolenoid, HIGH);
     
@@ -312,7 +312,6 @@ time_t parseDateTime(String dateTimeStr) {
 
 
 
-
 void decodejson(String apiResponse) {
   StaticJsonDocument<4096> doc;
   deserializeJson(doc, apiResponse);
@@ -323,27 +322,13 @@ void decodejson(String apiResponse) {
   if (doc.size() > 0) {
     // Access the first element of the array
     JsonObject lockData = doc[0];
-    Serial.println(apiResponse);
+
 
     // Print the entire JSON object
     // Serial.println("JSON Object:");
     // serializeJsonPretty(lockData, Serial);
     // Serial.println("JSON Object End");
-    JsonArray extensions = lockData["extensions"].as<JsonArray>();
-  
-    // Iterate through each element in the "extensions" array
-       for (JsonObject extension : extensions) {
-      // Check if the "slug" is "verification-picture"
-      if (extension["slug"] == "verification-picture") {
-        // Access the "_id" field
-        const char* verificationIdChar = extension["_id"];
-        verificationId = String(verificationIdChar);
-        
-        // Print or use the verification ID as needed
-        Serial.print("Verification Picture ID: ");
-        Serial.println(verificationId);
-      }
-    }
+
     // Check if the key "extensionsAllowUnlocking" exists in the JSON object
     if (lockData.containsKey("extensionsAllowUnlocking")) {
       // Check the type of the value
@@ -361,13 +346,12 @@ void decodejson(String apiResponse) {
 
     // Modify other conditions in a similar way...
     
-    // canBeUnlocked = lockData["canBeUnlocked"].as<bool>();
+    canBeUnlocked = lockData["canBeUnlocked"].as<bool>();
     isAllowedToViewTime = lockData["isAllowedToViewTime"].as<bool>();
     isFrozen = lockData["isFrozen"].as<bool>();
 
     endDateStr = lockData["endDate"].as<String>();
     lockStatus = lockData["status"].as<String>();
-    lockID = lockData["_id"].as<String>();
 
     Serial.println("Extracting values:");
     Serial.print("extensionsAllowUnlocking: ");
@@ -382,8 +366,6 @@ void decodejson(String apiResponse) {
     Serial.println(isFrozen);
     Serial.print("status: ");
     Serial.println(lockStatus);
-    Serial.print("id: ");
-    Serial.println(lockID);
     currentTime = time(nullptr);
     time_t endDate = parseDateTime(endDateStr);
     if (endDate>currentTime) {
@@ -436,11 +418,9 @@ void decodejson(String apiResponse) {
 
 void performApiCall() {
   HTTPClient httpApiClient;
-  #if defined(ESP32)
+
   bool begun = httpApiClient.begin(apiEndpoint);
-  #else
-  bool begun = httpApiClient.begin(wifiClient ,apiEndpoint);
-  #endif
+
   if (begun) {
     httpApiClient.addHeader("Authorization", "Bearer " + accessToken);
 
@@ -449,14 +429,17 @@ void performApiCall() {
     if (httpResponseCode == HTTP_CODE_OK) {
       String apiResponse = httpApiClient.getString();
       decodejson(apiResponse);
-      if (((lockStatus == "locked" && extensionsAllowUnlocking) && (jsonresponse))) {
+      Serial.println("apirespnse" + apiResponse);
+      
+      if (((lockStatus == "locked" && extensionsAllowUnlocking))) {
         canBeUnlocked = false;
+        Serial.println("closed");
       } else {
         canBeUnlocked = true;
       }
     } else {
       Serial.printf("[HTTP] GET... failed, error code: %d\n", httpResponseCode);
-      canBeUnlocked = true;
+      canBeUnlocked = false;
     }
     
     httpApiClient.end();

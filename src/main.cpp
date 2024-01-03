@@ -35,14 +35,14 @@ WiFiClient wifiClient;
 #endif
 
 
-const char pin1 = 12;
-const char pin2 = 13;
-const char pinsolenoid = 14;
+const char pin1 = 18;
+const char pin2 = 19;
+const char pinsolenoid = 17;
 
 const char *ssid = "";
 const char *password = "";
-const char *clientId = "locky-558750";
-const char *clientSecret = "e3fd7301-3b8b-42f1-ac89-7d4d3d6bd9fb";
+const char *clientId = "";
+const char *clientSecret = "";
 const char *redirectUri = "http://esplockbox.local/callback";
 const char *oauthEndpoint = "https://sso.chaster.app/auth/realms/app/protocol/openid-connect/auth";
 const char *tokenEndpoint = "https://sso.chaster.app/auth/realms/app/protocol/openid-connect/token";
@@ -115,12 +115,6 @@ String apiResponse;
 
 
 void setup() {
-  #if defined(ESP32)
-  ESP32PWM::allocateTimer(0);
-	ESP32PWM::allocateTimer(1);
-	ESP32PWM::allocateTimer(2);
-	ESP32PWM::allocateTimer(3);
-  #endif
   preferences.begin("wifi", true);
   String savedSSID = preferences.getString("ssid", "");
   String savedPassword = preferences.getString("password", "");
@@ -160,19 +154,20 @@ void setup() {
   Serial.println("HTTP server started");
 
   getNTPTime();
-  #if defined(ESP32)
-  servo1.setPeriodHertz(50);
-  #endif 
-  servo1.attach(servoPin, 1000, 2000);
+  // #if defined(ESP32)
+  // servo1.setPeriodHertz(50);
+  // #endif 
+  // servo1.attach(servoPin, 1000, 2000);
   // lcd.begin(16, 2);  // initialize the lcd
   // lcd.clear();       // clear the LCD screen
-  servo1.write(10);
+  // servo1.write(10);
   server.addHandler(&webSocket);
   webSocket.onEvent(onWebSocketEvent);
 
   server.on("/", HTTP_GET, handleMain);
   MDNS.addService("http", "tcp", 80);
-
+  
+  Serial.print("2");
 
 
   if (!SPIFFS.begin(true)) {
@@ -180,16 +175,20 @@ void setup() {
     return;
   }
 
-
+  Serial.print("3");
 
   pinMode(pin1, INPUT_PULLUP);
   pinMode(pin2, INPUT_PULLUP);
+  Serial.print("3.1");
   attachInterrupt(digitalPinToInterrupt(pin1), pinChangeInterrupt, CHANGE);
   attachInterrupt(digitalPinToInterrupt(pin2), pinChangeInterrupt, CHANGE);
-  pinChangeInterrupt();
+  Serial.print("3.2");
   pinMode(pinsolenoid, OUTPUT);
+  Serial.print("3.4");
   digitalWrite(pinsolenoid, HIGH);
-
+  Serial.print("3.5");
+  pinChangeInterrupt();
+  Serial.print("4");
 }
 
 

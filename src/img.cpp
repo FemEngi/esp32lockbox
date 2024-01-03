@@ -49,8 +49,8 @@ void checkupdate() {
     }
 }
 
-
-#if !defined(PSRAM_AVAILABLE)
+#if true
+// #if !defined(PSRAM_AVAILABLE)
 
 
 String verificationId;
