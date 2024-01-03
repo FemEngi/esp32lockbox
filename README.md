@@ -1,15 +1,18 @@
-How to use: 
-1. run the provided exe or build your own and run it
-2. once your esp32 is flashed, pin 13 will be sending servo outputs with 0 being open and 180 being closed, if you build it this can be configured however you will need chaster api access
-3. connect to its access point
-4. go to esp8266.local and enter credentials
-5. wait a few minuites
-6. go to esp8266.local on your pc and wait a few seconds
-7. it works
+How to use:
+to build- 
+* install platformio
+* open folder as project
+* go to main.cpp and enter your client id and client secret
+* open platformio toolbar, select your platform, hit upload filesystem image
+* hit upload once the first part is done
+* if you have not entered your ssid+password in the main.cpp, connect to the network esplockbox and go to esplockbox.local
+* enter in your browser esplockbox.local to initilize the lockbox
+* in a new tab, go to esplockbox.local to view remaining time and unlock
+* repeat the last 2 steps every time you power it off
 
-to build it
-1. open espfw and build with the vscode extension platformio. here you can change settings as you please.
-2. hit upload on platformio
-3. begin on step 2 of how to use.
 
-after powering off the device it will not update until you go to esp8266.local again
+parts needed-
+* esp32
+* 5v solenoid
+* mosfet
+* 2 limit switches for key detection
